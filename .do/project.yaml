@@ -1,0 +1,36 @@
+name: do-app-platform-monorepo
+region: ams
+services:
+- environment_slug: php
+  envs:
+  - key: APP_ENV
+    scope: RUN_AND_BUILD_TIME
+    value: prod
+  github:
+    branch: master
+    deploy_on_push: true
+    repo: Stirreg/do-app-platform-monorepo
+  source_dir: api
+  http_port: 80
+  instance_count: 1
+  instance_size_slug: basic-xxs
+  name: api
+  routes:
+  - path: /api
+  run_command: |-
+    heroku-php-nginx -C nginx.conf public/
+static_sites:
+- build_command: yarn generate
+  environment_slug: node-js
+  envs:
+  - key: API_URL
+    scope: BUILD_TIME
+    value: ${APP_URL}/api
+  github:
+    branch: master
+    deploy_on_push: true
+    repo: Stirreg/do-app-platform-monorepo
+  source_dir: frontend
+  name: frontend
+  routes:
+  - path: /
