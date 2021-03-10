@@ -1,0 +1,28 @@
+version: '3.7'
+services:
+  php:
+    build: ./docker/php
+    volumes:
+      - ./api:/application
+
+  node:
+    image: node:14
+    working_dir: /application
+    environment:
+      - HOST=0.0.0.0
+      - API_URL=http://localhost:8000
+    ports:
+      - 3000:3000
+    volumes:
+      - ./frontend:/application
+    command: bash -c "yarn dev"
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - 8000:80
+    links:
+      - php
+    volumes:
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./api:/application
