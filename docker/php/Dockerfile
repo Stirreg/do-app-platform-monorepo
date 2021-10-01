@@ -14,10 +14,8 @@ COPY xdebug.ini $PHP_INI_DIR/conf.d/xdebug.ini
 
 COPY --from=composer /usr/bin/composer /usr/bin/composer
 
-# ENV COMPOSER_ALLOW_SUPERUSER=1
-# RUN composer global require "hirak/prestissimo:^0.3" --prefer-dist --no-progress --no-suggest --classmap-authoritative && \
-#     composer clear-cache
-
 WORKDIR /application
+
+RUN composer install
 
 CMD ["php-fpm"]

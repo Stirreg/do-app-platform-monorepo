@@ -1,28 +1,61 @@
 version: '3.7'
+
+networks:
+  internal:
+  web:
+    external: true
+
 services:
   php:
     build: ./docker/php
     volumes:
       - ./api:/application
+    networks:
+      - internal
 
   node:
     image: node:14
     working_dir: /application
     environment:
       - HOST=0.0.0.0
-      - API_URL=http://localhost:8000
-    ports:
-      - 3000:3000
+      - API_URL=http://api.do-app-platform-monorepo.localhost
     volumes:
       - ./frontend:/application
-    command: bash -c "yarn dev"
+    networks:
+      - web
+    # Here we define our settings for traefik how to proxy our service.
+    labels:
+      # This is enableing treafik to proxy this service
+      - "traefik.enable=true"
+      # Here we have to define the URL
+      - "traefik.http.routers.do-app-platform-monorepo.rule=Host(`do-app-platform-monorepo.localhost`)"
+      # Here we are defining wich entrypoint should be used by clients to access this service
+      - "traefik.http.routers.do-app-platform-monorepo.entrypoints=web"
+      # Here we define in wich network treafik can find this service
+      - "traefik.docker.network=web"
+      # This is the port that traefik should proxy
+      - "traefik.http.services.do-app-platform-monorepo.loadbalancer.server.port=3000"
+    command: bash -c "yarn install && yarn dev"
 
   nginx:
     image: nginx:latest
-    ports:
-      - 8000:80
     links:
       - php
     volumes:
       - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
       - ./api:/application
+    networks:
+      - web
+      - internal
+    # Here we define our settings for traefik how to proxy our service.
+    labels:
+      # This is enableing treafik to proxy this service
+      - "traefik.enable=true"
+      # Here we have to define the URL
+      - "traefik.http.routers.do-app-platform-monorepo-api.rule=Host(`api.do-app-platform-monorepo.localhost`)"
+      # Here we are defining wich entrypoint should be used by clients to access this service
+      - "traefik.http.routers.do-app-platform-monorepo-api.entrypoints=web"
+      # Here we define in wich network treafik can find this service
+      - "traefik.docker.network=web"
+      # This is the port that traefik should proxy
+      - "traefik.http.services.do-app-platform-monorepo-api.loadbalancer.server.port=80"
