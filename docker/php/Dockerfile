@@ -16,6 +16,4 @@ COPY --from=composer /usr/bin/composer /usr/bin/composer
 
 WORKDIR /application
 
-RUN composer install
-
 CMD ["php-fpm"]
