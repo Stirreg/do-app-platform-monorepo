@@ -1,7 +1,7 @@
 version: '3.7'
 
 networks:
-  internal:
+  internal: null
   web:
     external: true
 
@@ -14,13 +14,13 @@ services:
       - internal
 
   node:
-    image: node:14
+    image: node:18
     working_dir: /application
     environment:
       - HOST=0.0.0.0
-      - API_URL=http://api.do-app-platform-monorepo.localhost
+      - API_URL=http://api.spruce.localhost
     volumes:
-      - ./frontend:/application
+      - ./website:/application
     networks:
       - web
     # Here we define our settings for traefik how to proxy our service.
@@ -28,13 +28,13 @@ services:
       # This is enableing treafik to proxy this service
       - "traefik.enable=true"
       # Here we have to define the URL
-      - "traefik.http.routers.do-app-platform-monorepo.rule=Host(`do-app-platform-monorepo.localhost`)"
+      - "traefik.http.routers.spruce.rule=Host(`spruce.localhost`)"
       # Here we are defining wich entrypoint should be used by clients to access this service
-      - "traefik.http.routers.do-app-platform-monorepo.entrypoints=web"
+      - "traefik.http.routers.spruce.entrypoints=web"
       # Here we define in wich network treafik can find this service
       - "traefik.docker.network=web"
       # This is the port that traefik should proxy
-      - "traefik.http.services.do-app-platform-monorepo.loadbalancer.server.port=3000"
+      - "traefik.http.services.spruce.loadbalancer.server.port=3000"
     command: bash -c "yarn install && yarn dev"
 
   nginx:
@@ -52,10 +52,10 @@ services:
       # This is enableing treafik to proxy this service
       - "traefik.enable=true"
       # Here we have to define the URL
-      - "traefik.http.routers.do-app-platform-monorepo-api.rule=Host(`api.do-app-platform-monorepo.localhost`)"
+      - "traefik.http.routers.spruce-api.rule=Host(`api.spruce.localhost`)"
       # Here we are defining wich entrypoint should be used by clients to access this service
-      - "traefik.http.routers.do-app-platform-monorepo-api.entrypoints=web"
+      - "traefik.http.routers.spruce-api.entrypoints=web"
       # Here we define in wich network treafik can find this service
       - "traefik.docker.network=web"
       # This is the port that traefik should proxy
-      - "traefik.http.services.do-app-platform-monorepo-api.loadbalancer.server.port=80"
+      - "traefik.http.services.spruce-api.loadbalancer.server.port=80"

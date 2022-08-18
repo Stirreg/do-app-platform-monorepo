@@ -1,12 +1,12 @@
 FROM composer:2 AS composer
 
-FROM php:8.0-fpm-alpine
+FROM php:8.1-fpm-alpine
 
 RUN apk add --no-cache acl make postgresql-dev && \
     docker-php-ext-install pdo_pgsql
 
 RUN apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
-    && pecl install xdebug-3.0.2 \
+    && pecl install xdebug \
     && docker-php-ext-enable xdebug \
     && apk del -f .build-deps
 
